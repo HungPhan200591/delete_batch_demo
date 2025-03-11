@@ -38,14 +38,34 @@ public class BathDeleteDemoApplication implements CommandLineRunner {
 
         String endDate = "20250310";
 
-        Supplier<Integer> supplier = () -> jdbcTemplate.query("SELECT COUNT(*) FROM tb_log_esb WHERE std_ymd < ?", rs -> {
+        int batchSize = 1000;
+
+
+
+//        Supplier<Integer> supplier = () -> jdbcTemplate.query("SELECT COUNT(*) FROM tb_log_esb WHERE std_ymd < ?", rs -> {
+//            rs.next();
+//            return rs.getInt(1);
+//        }, endDate);
+
+//        Function<Integer, Integer> deleteFunction = (count) -> jdbcTemplate.update("DELETE FROM tb_log_esb WHERE std_ymd < ? LIMIT ?", endDate, count);
+
+        int minId =  jdbcTemplate.query(
+                "SELECT MIN(log_esb_seq) FROM tb_log_esb WHERE std_ymd = ?",
+                rs -> {
+                    rs.next();
+                    return rs.getInt(1);
+                },
+                endDate
+        );
+
+        Supplier<Integer> supplier = () -> jdbcTemplate.query("SELECT COUNT(*) FROM tb_log_esb WHERE log_esb_seq < ?", rs -> {
             rs.next();
             return rs.getInt(1);
-        }, endDate);
+        }, minId);
 
-        Function<Integer, Integer> deleteFunction = (count) -> jdbcTemplate.update("DELETE FROM tb_log_esb WHERE std_ymd < ? LIMIT ?", endDate, count);
+        Function<Integer, Integer> deleteFunction = (count) -> jdbcTemplate.update("DELETE FROM tb_log_esb WHERE log_esb_seq < ? LIMIT ?", minId, count);
 
-        batchDeleteWithCount(1000,
+        batchDeleteWithCount(batchSize,
                 supplier,
                 deleteFunction
         );
@@ -103,15 +123,15 @@ public class BathDeleteDemoApplication implements CommandLineRunner {
 -- 5 millions records:
 - Query with std_ymd
 + batch size 1.000: 104037 ms
-+ batch size 10.000:
-+ batch size 50.000:
-+ batch size 100.000:
++ batch size 10.000: 81052 ms
++ batch size 50.000: 87801 ms
++ batch size 100.000: 159365 ms
 
 - Query with log_esb_seq
-+ batch size 1.000:
-+ batch size 10.000:
-+ batch size 50.000:
-+ batch size 100.000:
++ batch size 1.000: 96096 ms
++ batch size 10.000: 56731 ms
++ batch size 50.000: 141859 ms
++ batch size 100.000: 71373 ms
 
  */
 
