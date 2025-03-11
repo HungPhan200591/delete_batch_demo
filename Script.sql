@@ -23,7 +23,7 @@ CREATE INDEX idx_tb_log_esb_by_uuid ON tb_log_esb (uuid);
 USE test_delete;
 
 
-SHOW INDEX FROM tb_log_esb_10000;
+SHOW INDEX FROM tb_log_esb;
 
 ------------------------------------------------------------------------------------------------
 
@@ -36,18 +36,8 @@ VALUES ('20240924', UUID(), 'DSA_SAP_SD_SRS_0001', '{"I_CMITM": "1361", "I_GUBUN
 
 
 INSERT INTO tb_log_esb (
-    std_ymd, 
-    uuid, 
-    esb_id, 
-    input_data, 
-    input_header, 
-    request_datetime, 
-    response_datetime, 
-    time_taken, 
-    status, 
-    error_type, 
-    error_code, 
-    reason
+    std_ymd, uuid, esb_id, input_data, input_header, request_datetime, response_datetime, 
+    time_taken, status, error_type, error_code, reason
 )
 SELECT 
     '20250310', 
@@ -55,13 +45,7 @@ SELECT
     'DSA_SAP_SD_SRS_0001', 
     '{"I_CMITM": "1361", "I_GUBUN": "L", "I_PERNR": "20468925", "I_YYYYMM": "202410"}',
     '{"IF_ID": "DSA_SAP_SD_SRS_0004", "RST_CD": "", "IF_DATE": "20241029180646", "IF_HOST": "b5e51f6f06d9", "IF_UUID": "f8bdaac7-139b-410b-8c57-4e31043fe3d2", "RST_MSG": "", "IF_ADDITIONAL_DATA": ""}',
-    NOW(3), 
-    NOW(3),
-    0,
-    'SUC',
-    NULL,
-    NULL,
-    NULL
+    NOW(3), NOW(3), 0, 'SUC', NULL, NULL, NULL
 FROM (
     SELECT 
       a.N + b.N * 10 + c.N * 100 + d.N * 1000 + e.N * 10000 + f.N * 100000 + g.N * 1000000 + h.N * 10000000 AS num
@@ -87,13 +71,15 @@ TRUNCATE TABLE tb_log_esb;
 
 SELECT COUNT(*) FROM tb_log_esb;
 
+SELECT COUNT(*) FROM tb_log_esb WHERE std_ymd = '20250310';
+
 SELECT COUNT(*) FROM tb_log_esb WHERE std_ymd < '20250310';
 
 SELECT COUNT(*) FROM tb_log_esb WHERE std_ymd = '20250309';
 
 SELECT COUNT(*) FROM tb_log_esb WHERE log_esb_seq <= 5000000;
 
-SELECT * FROM tb_log_esb_10000;
+SELECT * FROM tb_log_esb  ORDER BY request_datetime LIMIT 10;
 
 SELECT MAX (log_esb_seq) FROM tb_log_esb;
 
@@ -106,11 +92,41 @@ DELETE FROM tb_log_esb WHERE std_ymd < '20250310';
 DELETE FROM tb_log_esb WHERE log_esb_seq < 14300000;
 
 
-
 DELETE FROM tb_log_esb LIMIT 1000000;
+
+SELECT MIN(log_esb_seq) FROM tb_log_esb WHERE std_ymd = '20250310'
 
 CREATE TABLE tb_log_esb_50000 LIKE tb_log_esb;
 INSERT INTO tb_log_esb_50000 SELECT * FROM tb_log_esb;
 
 DROP TABLE tb_log_esb_100000;
+
+------------
+
+
+INSERT INTO tb_log_esb (
+    std_ymd, uuid, esb_id, input_data, input_header, request_datetime, response_datetime, 
+    time_taken, status, error_type, error_code, reason
+)
+SELECT 
+    '20250310', 
+    UUID(), 
+    'DSA_SAP_SD_SRS_0001', 
+    '{"I_CMITM": "1361", "I_GUBUN": "L", "I_PERNR": "20468925", "I_YYYYMM": "202410"}',
+    '{"IF_ID": "DSA_SAP_SD_SRS_0004", "RST_CD": "", "IF_DATE": "20241029180646", "IF_HOST": "b5e51f6f06d9", "IF_UUID": "f8bdaac7-139b-410b-8c57-4e31043fe3d2", "RST_MSG": "", "IF_ADDITIONAL_DATA": ""}',
+    NOW(3), NOW(3), 0, 'SUC', NULL, NULL, NULL
+FROM (
+    SELECT 
+      a.N + b.N * 10 AS num
+    FROM 
+      (SELECT 0 AS N UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) a,
+      (SELECT 0 AS N UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) b
+) numbers
+WHERE num < 100;
+
+
+
+
+
+
 
