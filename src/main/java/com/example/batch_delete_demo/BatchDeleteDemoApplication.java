@@ -1,31 +1,28 @@
-package com.example.bath_delete_demo;
+package com.example.batch_delete_demo;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 @Slf4j
 @SpringBootApplication
 @RequiredArgsConstructor
-public class BathDeleteDemoApplication implements CommandLineRunner {
+@MapperScan("com.example.batch_delete_demo.mapper")
+public class BatchDeleteDemoApplication implements CommandLineRunner {
 
     private final BatchDeleteService batchDeleteService;
 
     public static void main(String[] args) {
-        SpringApplication.run(BathDeleteDemoApplication.class, args);
+        SpringApplication.run(BatchDeleteDemoApplication.class, args);
     }
 
     @Override
     public void run(String... args) {
-        batchDeleteService.test();
+//        batchDeleteService.test();
+        batchDeleteService.test2();
     }
 }
 
@@ -43,6 +40,12 @@ public class BathDeleteDemoApplication implements CommandLineRunner {
 + batch size 10.000: 56731 ms
 + batch size 50.000: 141859 ms
 + batch size 100.000: 71373 ms
+
+- Using doBatching
++ batch size 500: 125596 ms
++ batch size 1.000: 78659 ms
++ batch size 5.000: 75066 ms
++ batch size 10.000: 89165 ms
 
  */
 
